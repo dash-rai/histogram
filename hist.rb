@@ -1,12 +1,26 @@
 require 'csv'
 
-data = CSV.read('./hist-data.csv')
+if ARGV.first.nil?
+  puts "No input file specified. Exiting"
+  puts "Syntax: ruby hist.rb input_file.csv"
+  exit
+else
+ input_file = ARGV.first
+end
+
+begin
+  data = CSV.read(input_file)
+rescue
+  puts "That file cannot be opened."
+  exit
+end
+
 data = data[0]
 data.map! { |value| value.to_i }
 data.sort!
 min = data.min
 max = data.max
-step = (max - min)/10.0
+step = (max - min)/10.0 #there should be a better way of doing this.
 hist = [0] # or hist = Array.new(1, 0)
 
 current_range = min + step
@@ -25,7 +39,7 @@ hist.each_with_index do |freq, key|
   puts "#{min+step*key}-#{min+step*(key+1)}: #{freq.to_i}"
 end
 
-d3_output = <<D3OUTPUT
+d3_output = <<HTML
 
 <!DOCTYPE html>
 <html lang="en">
@@ -63,7 +77,7 @@ d3_output = <<D3OUTPUT
 		</script>
 	</body>
 </html>
-D3OUTPUT
+HTML
 
 output = File.open("index.html", "w")
 output << d3_output
